@@ -41,6 +41,7 @@ contract ArcBusiness {
     event MilestoneCreated(uint256 indexed agreementId, uint256 indexed milestoneId, string description, uint256 amount, uint256 deadline);
     event USDCLocked(uint256 indexed agreementId, uint256 indexed milestoneId, uint256 amount);
     event PaymentReleased(uint256 indexed agreementId, uint256 indexed milestoneId, address indexed provider, uint256 amount);
+    event WorkSubmitted(uint256 indexed agreementId, uint256 indexed milestoneId, address indexed provider);
     event DisputeOpened(uint256 indexed agreementId, uint256 indexed milestoneId, address indexed by);
     event Refunded(uint256 indexed agreementId, uint256 indexed milestoneId, address indexed client, uint256 amount);
 
@@ -113,6 +114,17 @@ contract ArcBusiness {
         m.status = MilestoneStatus.Released;
         require(USDC.transfer(a.provider, m.amount), "transfer failed");
         emit PaymentReleased(agreementId, milestoneId, a.provider, m.amount);
+    }
+
+    /// @notice Provider marks work as delivered on a funded milestone (deliverable
+    ///         details are stored off-chain). Escrowed funds are untouched; the
+    ///         client still calls releasePayment() or openDispute().
+    function submitWork(uint256 agreementId, uint256 milestoneId) external {
+        Agreement storage a = agreements[agreementId];
+        Milestone storage m = milestones[agreementId][milestoneId];
+        require(msg.sender == a.provider, "only provider");
+        require(m.status == MilestoneStatus.Funded, "not funded");
+        emit WorkSubmitted(agreementId, milestoneId, msg.sender);
     }
 
     /// @notice Either party opens a dispute on a funded milestone.

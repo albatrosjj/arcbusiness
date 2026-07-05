@@ -3,116 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ArcBusiness — Stripe for Agreements</title>
+<title>ArcBusiness — Agreements Infrastructure on Arc</title>
 <style>
   :root {
-    --bg: #0a0f0d;
-    --panel: #111816;
-    --panel-2: #16201d;
-    --border: #1f2b27;
-    --text: #e7efec;
-    --muted: #8aa39b;
-    --accent: #22c55e;
-    --accent-dim: rgba(34, 197, 94, 0.12);
-    --danger: #ef4444;
-    --warn: #f59e0b;
-    --radius: 12px;
+    --bg: #0f1117;
+    --panel: #151823;
+    --panel-2: #1a1e2c;
+    --border: #262b3d;
+    --border-strong: #333a52;
+    --text: #e6e8ef;
+    --muted: #8b91a7;
+    --faint: #5c617a;
+    --accent: #3b82f6;
+    --accent-soft: rgba(59, 130, 246, 0.12);
+    --accent-border: rgba(59, 130, 246, 0.35);
+    --success: #34d399;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --radius: 10px;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
-    min-height: 100vh;
-  }
+  html { -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
   header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 32px; border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; background: rgba(10,15,13,.9); backdrop-filter: blur(8px); z-index: 10;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: rgba(15,17,23,.85); backdrop-filter: blur(12px); z-index: 10;
   }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
   .logo-mark {
-    width: 30px; height: 30px; border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #15803d);
-    display: grid; place-items: center; color: #04120a; font-weight: 800;
+    width: 28px; height: 28px; border-radius: 7px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 14px;
   }
   .badge {
-    font-size: 11px; padding: 3px 10px; border-radius: 999px;
-    background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(34,197,94,.3);
+    font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 999px;
+    background: var(--accent-soft); color: #93b8f8; border: 1px solid var(--accent-border);
+    white-space: nowrap;
   }
-  .role-switch { display: flex; background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
-  .role-switch button {
-    background: none; border: none; color: var(--muted); padding: 7px 18px;
-    border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 600;
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 32px 28px 64px; display: grid; gap: 24px; }
+  .hero h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .hero p { color: var(--muted); font-size: 14px; max-width: 620px; }
+
+  .signin-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    background: var(--accent-soft); border: 1px solid var(--accent-border);
+    border-radius: var(--radius); padding: 14px 18px; font-size: 13px; color: #b9d0fa;
   }
-  .role-switch button.active { background: var(--accent); color: #04120a; }
-  main { max-width: 1100px; margin: 0 auto; padding: 32px; display: grid; gap: 24px; }
-  .hero h1 { font-size: 28px; margin-bottom: 6px; }
-  .hero p { color: var(--muted); font-size: 14px; }
-  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-  .card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 22px;
-  }
-  .card h2 { font-size: 15px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .card h2 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-  label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 5px; }
+
+  .grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } main { padding: 24px 16px 48px; } header { padding: 12px 16px; } }
+
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin: 12px 0 5px; }
   input, textarea {
-    width: 100%; background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: inherit;
+    width: 100%; background: var(--bg); border: 1px solid var(--border-strong);
+    border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: inherit;
+    transition: border-color .15s;
   }
-  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+  input::placeholder, textarea::placeholder { color: var(--faint); }
+
   .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--accent); color: #04120a; border: none; border-radius: 8px;
-    padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 16px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--accent); color: #fff; border: none; border-radius: 7px;
+    padding: 9px 16px; font-size: 13px; font-weight: 550; cursor: pointer; margin-top: 14px;
+    font-family: inherit; transition: background .15s;
   }
-  .btn:hover { filter: brightness(1.1); }
+  .btn:hover { background: #2f6fe0; }
   .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .btn-ghost { background: transparent; color: var(--accent); border: 1px solid rgba(34,197,94,.4); }
-  .btn-sm { padding: 6px 12px; font-size: 12px; margin-top: 0; }
-  .btn-danger { background: transparent; color: var(--danger); border: 1px solid rgba(239,68,68,.4); }
-  .agreement {
-    border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 18px; margin-bottom: 14px; background: var(--panel-2);
+  .btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent-border); }
+  .btn-ghost:hover { background: var(--accent-soft); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; margin-top: 0; }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid rgba(248,113,113,.35); }
+  .btn-danger:hover { background: rgba(248,113,113,.1); }
+  .btn-success { background: #059669; }
+  .btn-success:hover { background: #047857; }
+
+  .agreement { border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; background: var(--panel-2); }
+  .agreement-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .agreement-head h3 { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .amount { color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; font-size: 14px; }
+  .amount .unit { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .meta { font-size: 12px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .meta a { color: var(--accent); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .meta a:hover { text-decoration: underline; }
+
+  /* ---- Workflow step indicator ---- */
+  .steps { display: flex; align-items: flex-start; margin: 4px 0 16px; overflow-x: auto; padding-bottom: 4px; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 62px; flex: 1; position: relative; }
+  .step::before {
+    content: ""; position: absolute; top: 11px; left: -50%; width: 100%; height: 2px;
+    background: var(--border); z-index: 0;
   }
-  .agreement-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .agreement-head h3 { font-size: 15px; }
-  .amount { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
-  .meta { font-size: 11px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
-  .milestone {
-    display: flex; justify-content: space-between; align-items: center; gap: 12px;
-    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; margin-top: 8px;
+  .step:first-child::before { display: none; }
+  .step.done::before, .step.current::before { background: var(--accent); }
+  .step-dot {
+    width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 11px; font-weight: 600; z-index: 1; position: relative;
+    background: var(--panel); border: 2px solid var(--border); color: var(--faint);
   }
-  .milestone .desc { font-size: 13px; flex: 1; }
+  .step.done .step-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .step.current .step-dot { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 4px rgba(59,130,246,.12); }
+  .step.danger .step-dot { background: rgba(248,113,113,.12); border-color: var(--danger); color: var(--danger); }
+  .step-label { font-size: 10px; color: var(--faint); text-align: center; line-height: 1.2; white-space: nowrap; }
+  .step.done .step-label, .step.current .step-label { color: var(--muted); }
+  .step.current .step-label { color: var(--accent); font-weight: 600; }
+  .step.danger .step-label { color: var(--danger); }
+
+  .milestone { padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; background: var(--panel); }
+  .milestone-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .milestone .desc { font-size: 13px; flex: 1; min-width: 180px; }
   .milestone .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .status { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: .05em; }
-  .s-Created  { background: rgba(138,163,155,.15); color: var(--muted); }
-  .s-Funded   { background: rgba(245,158,11,.15); color: var(--warn); }
-  .s-Released { background: var(--accent-dim); color: var(--accent); }
-  .s-Disputed { background: rgba(239,68,68,.15); color: var(--danger); }
-  .s-Refunded { background: rgba(96,165,250,.15); color: #60a5fa; }
-  .actions { display: flex; gap: 6px; }
-  .txlog { font-size: 12px; margin-top: 14px; display: grid; gap: 6px; max-height: 220px; overflow-y: auto; }
-  .txlog a { color: var(--accent); text-decoration: none; }
-  .txlog a:hover { text-decoration: underline; }
-  .tx-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; }
-  .spinner {
-    width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent);
-    border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0;
+  .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .status { font-size: 10px; font-weight: 650; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+  .s-Created   { background: rgba(139,145,167,.12); color: var(--muted); }
+  .s-Funded    { background: var(--accent-soft); color: #93b8f8; }
+  .s-Submitted { background: rgba(251,191,36,.12); color: var(--warn); }
+  .s-Released  { background: rgba(52,211,153,.12); color: var(--success); }
+  .s-Disputed  { background: rgba(248,113,113,.12); color: var(--danger); }
+  .s-Refunded  { background: rgba(139,145,167,.12); color: var(--muted); }
+
+  .inline-form {
+    margin-top: 12px; padding: 14px; border: 1px dashed var(--accent-border);
+    border-radius: 8px; background: rgba(59,130,246,.05);
   }
+  .inline-form .form-title { font-size: 12px; font-weight: 600; color: #93b8f8; }
+  .submission-box { margin-top: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-size: 12px; }
+  .submission-box .st { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--warn); margin-bottom: 4px; }
+  .submission-box a { color: var(--accent); }
+  .countdown { font-size: 12px; color: var(--warn); }
+
+  .txlog { font-size: 12px; margin-top: 4px; display: grid; gap: 6px; max-height: 220px; overflow-y: auto; }
+  .txlog a { color: var(--accent); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .txlog a:hover { text-decoration: underline; }
+  .tx-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px; }
+  .spinner { width: 12px; height: 12px; border: 2px solid var(--border-strong); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .check { color: var(--accent); }
+  .check { color: var(--success); }
   .cross { color: var(--danger); }
-  .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 30px 0; }
+  .empty { color: var(--faint); font-size: 13px; text-align: center; padding: 28px 0; }
+
   .toast {
     position: fixed; bottom: 24px; right: 24px; background: var(--panel);
-    border: 1px solid var(--accent); border-radius: 10px; padding: 12px 18px;
-    font-size: 13px; display: none; z-index: 100;
+    border: 1px solid var(--border-strong); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 12px 18px; font-size: 13px; display: none; z-index: 100;
+    max-width: 380px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
   }
-  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px; }
+  footer { text-align: center; color: var(--faint); font-size: 12px; padding: 24px; border-top: 1px solid var(--border); }
   footer a { color: var(--accent); text-decoration: none; }
+  footer code { font-family: var(--mono); font-size: 11px; }
+
+  .account-chip {
+    display: flex; align-items: center; gap: 10px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 7px 5px 13px; font-size: 12px;
+  }
+  .account-chip .addr a { color: var(--accent); font-family: var(--mono); font-size: 11px; text-decoration: none; }
+  .account-chip .bal { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(8,10,15,.7); backdrop-filter: blur(4px); display: none; place-items: center; z-index: 50; }
+  .modal-backdrop.open { display: grid; }
+  .modal { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 12px; padding: 26px; width: 380px; max-width: calc(100vw - 32px); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .modal p { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .otp-hint { font-size: 11px; color: var(--warn); margin-top: 8px; }
+  .modal .close { float: right; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; }
 </style>
 </head>
 <body>
@@ -120,25 +183,55 @@
   <div class="logo">
     <div class="logo-mark">A</div>
     ArcBusiness
-    <span class="badge">Arc Testnet · 5042002</span>
+    <span class="badge">Arc Testnet</span>
   </div>
-  <div class="role-switch" id="roleSwitch">
-    <button class="active" data-role="client">Client</button>
-    <button data-role="provider">Service Provider</button>
+  <div class="header-right" id="accountArea">
+    <button class="btn btn-sm" style="margin-top:0" onclick="openLogin()">Sign in</button>
   </div>
 </header>
 
+<!-- Login modal -->
+<div class="modal-backdrop" id="loginModal">
+  <div class="modal">
+    <button class="close" onclick="closeLogin()">✕</button>
+    <div id="stepEmail">
+      <h2>Sign in to ArcBusiness</h2>
+      <p>Enter your email — we'll send a one-time code and set up your USDC wallet on Arc Testnet.</p>
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="you@company.com">
+      <button class="btn" id="btnSendOtp">Send code</button>
+    </div>
+    <div id="stepOtp" style="display:none">
+      <h2>Enter your code</h2>
+      <p>We sent a 6-digit code to <span id="otpEmailLabel"></span>.</p>
+      <label>One-time code</label>
+      <input id="loginOtp" inputmode="numeric" maxlength="6" placeholder="123456">
+      <div class="otp-hint" id="otpHint" style="display:none"></div>
+      <button class="btn" id="btnVerifyOtp">Verify &amp; sign in</button>
+    </div>
+    <div id="stepBusy" style="display:none">
+      <h2>Setting up your wallet…</h2>
+      <p>Creating your Circle wallet on Arc Testnet. This takes a few seconds.</p>
+      <div class="spinner" style="margin:10px auto"></div>
+    </div>
+  </div>
+</div>
+
 <main>
   <div class="hero">
-    <h1>Stripe for Agreements</h1>
-    <p>Milestone-based USDC escrow on Arc. Create agreements, lock funds, release payments — with a 48h auto-refund on disputes.</p>
+    <h1>Agreements infrastructure for USDC</h1>
+    <p>Milestone-based escrow on Arc. Funds lock when a milestone is added, release when the client approves the work — with a 48-hour auto-refund on unresolved disputes.</p>
+  </div>
+
+  <div class="signin-banner" id="signinBanner" style="display:none">
+    <span>You're viewing in read-only mode. Sign in to create agreements, submit work, and move payments.</span>
+    <button class="btn btn-sm" style="margin-top:0" onclick="openLogin()">Sign in to participate</button>
   </div>
 
   <div class="grid">
-    <div style="display:grid; gap:24px;">
-      <!-- Create agreement (client role) -->
+    <div style="display:grid; gap:24px;" id="sidebarForms">
       <div class="card" id="createCard">
-        <h2><span class="dot"></span>New Agreement</h2>
+        <h2>New Agreement</h2>
         <label>Service provider address</label>
         <input id="party2" placeholder="0x…">
         <label>Title</label>
@@ -148,34 +241,35 @@
         <button class="btn" id="btnCreate">Create Agreement</button>
       </div>
 
-      <!-- Add milestone -->
-      <div class="card">
-        <h2><span class="dot"></span>Add Milestone</h2>
-        <label>Agreement ID</label>
-        <input id="msAgreementId" type="number" min="0" placeholder="0">
+      <div class="card" id="postJobCard">
+        <h2>Post a Job</h2>
+        <label>Title</label>
+        <input id="jobTitle" placeholder="Landing page build">
         <label>Description</label>
-        <textarea id="msDescription" rows="2" placeholder="Deliver homepage design"></textarea>
-        <label>Amount (USDC)</label>
-        <input id="msAmount" type="number" min="0" step="0.01" placeholder="150.00">
+        <textarea id="jobDescription" rows="2" placeholder="What needs to be done"></textarea>
+        <label>Budget (USDC)</label>
+        <input id="jobBudget" type="number" min="0" step="0.01" placeholder="300.00">
         <label>Deadline</label>
-        <input id="msDeadline" type="datetime-local">
-        <button class="btn" id="btnMilestone">Add Milestone</button>
+        <input id="jobDeadline" type="datetime-local">
+        <button class="btn" id="btnPostJob">Post Job</button>
       </div>
 
-      <!-- Transaction activity -->
       <div class="card">
-        <h2><span class="dot"></span>Transaction Activity</h2>
+        <h2>Activity</h2>
         <div class="txlog" id="txlog"><div class="empty">No transactions yet</div></div>
       </div>
     </div>
 
-    <!-- Agreements list -->
-    <div class="card">
-      <h2 style="justify-content:space-between;">
-        <span style="display:flex;align-items:center;gap:8px;"><span class="dot"></span>Agreements</span>
-        <button class="btn btn-ghost btn-sm" onclick="loadAgreements()">Refresh</button>
-      </h2>
-      <div id="agreements"><div class="empty">Loading…</div></div>
+    <div style="display:grid; gap:24px;">
+      <div class="card">
+        <h2><span>Open Jobs</span><button class="btn btn-ghost btn-sm" onclick="loadListings()">Refresh</button></h2>
+        <div id="listings"><div class="empty">Loading…</div></div>
+      </div>
+
+      <div class="card">
+        <h2><span>Agreements</span><button class="btn btn-ghost btn-sm" onclick="loadAgreements()">Refresh</button></h2>
+        <div id="agreements"><div class="empty">Loading…</div></div>
+      </div>
     </div>
   </div>
 </main>
@@ -189,25 +283,111 @@
 
 <script>
 const EXPLORER = "https://testnet.arcscan.app";
-let role = "client";
+const DISPUTE_WINDOW = 48 * 3600;
+let session = localStorage.getItem("arcbiz_session") || null;
+let currentUser = null;
 
-document.querySelectorAll("#roleSwitch button").forEach(b => b.onclick = () => {
-  document.querySelectorAll("#roleSwitch button").forEach(x => x.classList.remove("active"));
-  b.classList.add("active");
-  role = b.dataset.role;
-  document.getElementById("createCard").style.display = role === "client" ? "block" : "none";
-  loadAgreements();
-});
+// ---------- Auth ----------
+function openLogin() {
+  document.getElementById("loginModal").classList.add("open");
+  showStep("stepEmail");
+}
+function closeLogin() { document.getElementById("loginModal").classList.remove("open"); }
+function showStep(id) {
+  ["stepEmail", "stepOtp", "stepBusy"].forEach(s =>
+    document.getElementById(s).style.display = s === id ? "block" : "none");
+}
+
+document.getElementById("btnSendOtp").onclick = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  if (!email) return toast("Enter your email", true);
+  try {
+    const r = await api("/api/auth/request-otp", "POST", { email });
+    document.getElementById("otpEmailLabel").textContent = email;
+    showStep("stepOtp");
+    if (r.dev_otp) {
+      const hint = document.getElementById("otpHint");
+      hint.textContent = `Testnet — your code is ${r.dev_otp}`;
+      hint.style.display = "block";
+    }
+    document.getElementById("loginOtp").focus();
+  } catch (e) { toast(e.message, true); }
+};
+
+document.getElementById("btnVerifyOtp").onclick = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const otp = document.getElementById("loginOtp").value.trim();
+  showStep("stepBusy");
+  try {
+    const r = await api("/api/auth/verify", "POST", { email, otp });
+    session = r.token;
+    localStorage.setItem("arcbiz_session", session);
+    currentUser = r.user;
+    closeLogin();
+    renderAccount();
+    toast(`Signed in as ${r.user.email}`);
+    refreshAll();
+  } catch (e) {
+    showStep("stepOtp");
+    toast(e.message, true);
+  }
+};
+
+async function logout() {
+  try { await api("/api/auth/logout", "POST"); } catch (e) {}
+  session = null; currentUser = null;
+  localStorage.removeItem("arcbiz_session");
+  renderAccount();
+  toast("Signed out");
+  refreshAll();
+}
+
+function renderAccount() {
+  const area = document.getElementById("accountArea");
+  document.getElementById("signinBanner").style.display = currentUser ? "none" : "flex";
+  document.getElementById("sidebarForms").querySelectorAll("#createCard, #postJobCard")
+    .forEach(el => el.style.display = currentUser ? "block" : "none");
+  if (currentUser) {
+    const bal = currentUser.usdc_balance == null ? "—" : currentUser.usdc_balance.toFixed(2);
+    area.innerHTML = `
+      <div class="account-chip" title="${currentUser.email} · ${currentUser.wallet_address}">
+        <span class="addr"><a href="${EXPLORER}/address/${currentUser.wallet_address}" target="_blank">${short(currentUser.wallet_address)}</a></span>
+        <span class="bal">${bal} USDC</span>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
+      </div>`;
+  } else {
+    area.innerHTML = `<button class="btn btn-sm" style="margin-top:0" onclick="openLogin()">Sign in</button>`;
+  }
+}
+
+async function restoreSession() {
+  if (!session) { renderAccount(); return; }
+  try {
+    currentUser = await api("/api/auth/me");
+  } catch (e) {
+    session = null;
+    localStorage.removeItem("arcbiz_session");
+  }
+  renderAccount();
+}
+
+async function refreshBalance() {
+  if (!session) return;
+  try { currentUser = await api("/api/auth/me"); renderAccount(); } catch (e) {}
+}
+
+function refreshAll() { loadListings(); loadAgreements(); }
 
 function toast(msg, err = false) {
   const t = document.getElementById("toast");
   t.textContent = msg;
-  t.style.borderColor = err ? "var(--danger)" : "var(--accent)";
+  t.style.borderLeftColor = err ? "var(--danger)" : "var(--accent)";
   t.style.display = "block";
-  setTimeout(() => t.style.display = "none", 4000);
+  setTimeout(() => t.style.display = "none", 4500);
 }
 
 function logTx(label, txHash) {
+  if (!txHash) return;
   const log = document.getElementById("txlog");
   if (log.querySelector(".empty")) log.innerHTML = "";
   const item = document.createElement("div");
@@ -216,7 +396,6 @@ function logTx(label, txHash) {
     <a href="${EXPLORER}/tx/${txHash}" target="_blank">${txHash.slice(0,10)}…${txHash.slice(-6)}</a></div>`;
   log.prepend(item);
 
-  // Stream confirmation status via SSE
   const es = new EventSource(`/api/tx/${txHash}/stream`);
   es.onmessage = (e) => {
     const d = JSON.parse(e.data);
@@ -224,6 +403,7 @@ function logTx(label, txHash) {
       item.querySelector(".spinner").outerHTML = `<span class="check">✔</span>`;
       es.close();
       loadAgreements();
+      refreshBalance();
     } else if (d.stage === "failed" || d.stage === "timeout") {
       item.querySelector(".spinner").outerHTML = `<span class="cross">✖</span>`;
       es.close();
@@ -233,17 +413,21 @@ function logTx(label, txHash) {
 }
 
 async function api(path, method = "GET", body = null) {
-  const res = await fetch(path, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : null,
-  });
+  const headers = { "Content-Type": "application/json" };
+  if (session) headers["Authorization"] = `Bearer ${session}`;
+  const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : null });
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || "Request failed");
   return data;
 }
 
+function requireLogin() {
+  if (!currentUser) { toast("Sign in to participate", true); openLogin(); return false; }
+  return true;
+}
+
 document.getElementById("btnCreate").onclick = async () => {
+  if (!requireLogin()) return;
   try {
     const r = await api("/api/agreements", "POST", {
       party2: document.getElementById("party2").value.trim(),
@@ -252,24 +436,153 @@ document.getElementById("btnCreate").onclick = async () => {
     });
     toast(`Agreement #${r.agreement_id ?? "?"} created`);
     logTx("Create agreement", r.tx_hash);
+    ["party2", "title", "totalAmount"].forEach(id => document.getElementById(id).value = "");
   } catch (e) { toast(e.message, true); }
 };
 
-document.getElementById("btnMilestone").onclick = async () => {
+// ---------- Job listings ----------
+document.getElementById("btnPostJob").onclick = async () => {
+  if (!requireLogin()) return;
   try {
-    const deadline = Math.floor(new Date(document.getElementById("msDeadline").value).getTime() / 1000);
-    const r = await api("/api/milestones", "POST", {
-      agreement_id: parseInt(document.getElementById("msAgreementId").value),
-      description: document.getElementById("msDescription").value.trim(),
-      amount: parseFloat(document.getElementById("msAmount").value),
+    const deadline = Math.floor(new Date(document.getElementById("jobDeadline").value).getTime() / 1000);
+    if (!deadline) return toast("Pick a deadline", true);
+    const l = await api("/api/listings", "POST", {
+      title: document.getElementById("jobTitle").value.trim(),
+      description: document.getElementById("jobDescription").value.trim(),
+      budget: parseFloat(document.getElementById("jobBudget").value),
       deadline,
     });
-    toast("Milestone added");
-    logTx("Create milestone", r.tx_hash);
+    toast(`Job #${l.listing_id} posted`);
+    ["jobTitle", "jobDescription", "jobBudget", "jobDeadline"].forEach(id => document.getElementById(id).value = "");
+    loadListings();
   } catch (e) { toast(e.message, true); }
 };
 
+async function applyToListing(id) {
+  if (!requireLogin()) return;
+  try {
+    await api(`/api/listings/${id}/apply`, "POST", {});
+    toast("Applied — the client will review your application");
+    loadListings();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function acceptApplication(id, addr) {
+  if (!requireLogin()) return;
+  try {
+    const r = await api(`/api/listings/${id}/accept`, "POST", { wallet_address: addr });
+    toast(`Application accepted — agreement #${r.agreement_id ?? "?"} created`);
+    logTx(`Accept application (job #${id})`, r.tx_hash);
+    loadListings();
+  } catch (e) { toast(e.message, true); }
+}
+
+function isMyListing(l) {
+  return !!currentUser && l.client_email === currentUser.email;
+}
+
+function listingActions(l) {
+  if (l.status !== "open") return `<span class="status s-Released">Filled${l.agreement_id != null ? ` · #${l.agreement_id}` : ""}</span>`;
+  if (!currentUser) return `<span class="status s-Created">Open</span>`;
+  if (isMyListing(l)) {
+    return `<button class="btn btn-ghost btn-sm" onclick="toggleApps(${l.listing_id})">View Applications (${l.applicant_count})</button>`;
+  }
+  const applied = l.applications.some(a => a.email === currentUser.email);
+  return applied ? `<span class="status s-Funded">Applied</span>`
+    : `<button class="btn btn-sm" onclick="applyToListing(${l.listing_id})">Apply</button>`;
+}
+
+function toggleApps(id) {
+  const el = document.getElementById(`apps-${id}`);
+  if (el) el.style.display = el.style.display === "none" ? "block" : "none";
+}
+
+async function loadListings() {
+  const box = document.getElementById("listings");
+  try {
+    const { listings } = await api("/api/listings");
+    const shown = listings.filter(l => l.status === "open" || isMyListing(l));
+    if (!shown.length) { box.innerHTML = `<div class="empty">No open jobs yet.</div>`; return; }
+    box.innerHTML = shown.map(l => {
+      const mine = isMyListing(l);
+      const pending = mine && l.status === "open" && l.applicant_count > 0;
+      return `
+      <div class="agreement">
+        <div class="agreement-head">
+          <h3>Job #${l.listing_id} · ${l.title}${mine ? ` <span class="badge">Your listing</span>` : ""}</h3>
+          <span class="amount">${l.budget.toFixed(2)} <span class="unit">USDC</span></span>
+        </div>
+        <div class="meta">
+          <span>Deadline ${fmtDate(l.deadline)}</span>
+          <span>${l.applicant_count} applicant${l.applicant_count === 1 ? "" : "s"}</span>
+          ${pending ? `<span style="color:var(--warn)">Pending applications</span>` : ""}
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">${l.description || ""}</div>
+        <div class="actions">${listingActions(l)}</div>
+        ${mine ? `<div id="apps-${l.listing_id}" style="display:none">
+          ${l.applications.length ? l.applications.map(a => `
+            <div class="milestone"><div class="milestone-row">
+              <div class="desc">${a.email}
+                <div class="sub"><a href="${EXPLORER}/address/${a.wallet_address}" target="_blank" style="color:var(--accent)">${short(a.wallet_address)}</a> · applied ${fmtDate(a.applied_at)}</div>
+              </div>
+              ${l.status === "open" ? `<button class="btn btn-sm" onclick="acceptApplication(${l.listing_id},'${a.wallet_address}')">Accept</button>` : ""}
+            </div></div>`).join("") : `<div class="empty" style="padding:10px 0">No applications yet</div>`}
+        </div>` : ""}
+      </div>`;
+    }).join("");
+  } catch (e) {
+    box.innerHTML = `<div class="empty">${e.message}</div>`;
+  }
+}
+
+// ---------- Agreements & workflow ----------
+function short(a) { return a ? a.slice(0, 6) + "…" + a.slice(-4) : "—"; }
+function fmtDate(ts) { return new Date(ts * 1000).toLocaleString(); }
+function esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+
+// "client" | "provider" | null (signed in but not a party) | undefined (not signed in)
+function agreementRole(a) {
+  if (!currentUser || !currentUser.wallet_address) return undefined;
+  const addr = currentUser.wallet_address.toLowerCase();
+  if (a.client && a.client.toLowerCase() === addr) return "client";
+  if (a.provider && a.provider.toLowerCase() === addr) return "provider";
+  return null;
+}
+
+const STEP_LABELS = ["Created", "Milestone", "Escrowed", "Submitted", "Review", "Settled"];
+
+// Current workflow step (1-6) for a milestone status; agreement with no milestones = step 2 pending.
+function currentStep(a) {
+  if (!a.milestones.length) return { step: 2, status: null };
+  // Drive the tracker from the first milestone that still needs action; fall back to the last one.
+  const active = a.milestones.find(m => !["Released", "Refunded"].includes(m.status)) || a.milestones[a.milestones.length - 1];
+  const map = { Created: 3, Funded: 4, Submitted: 5, Disputed: 6, Released: 7, Refunded: 7 };
+  return { step: map[active.status] ?? 2, status: active.status, milestone: active };
+}
+
+function stepIndicator(a) {
+  const { step, status } = currentStep(a);
+  return `<div class="steps">` + STEP_LABELS.map((label, i) => {
+    const n = i + 1;
+    let cls = "";
+    if (n < step) cls = "done";
+    else if (n === step) cls = "current";
+    if (n === 6 && status === "Disputed") cls += " danger";
+    const dot = n < step ? "✓" : n;
+    const lbl = n === 6 && status === "Disputed" ? "Disputed" : label;
+    return `<div class="step ${cls}"><div class="step-dot">${dot}</div><div class="step-label">${lbl}</div></div>`;
+  }).join("") + `</div>`;
+}
+
+function roleBadge(a) {
+  const r = agreementRole(a);
+  if (r === "client") return ` <span class="badge">You are Client</span>`;
+  if (r === "provider") return ` <span class="badge" style="color:var(--warn);background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3)">You are Provider</span>`;
+  return "";
+}
+
 async function milestoneAction(path, label, aid, mid) {
+  if (!requireLogin()) return;
   try {
     const r = await api(`/api/milestones/${path}`, "POST", { agreement_id: aid, milestone_id: mid });
     toast(label + " submitted");
@@ -277,61 +590,162 @@ async function milestoneAction(path, label, aid, mid) {
   } catch (e) { toast(e.message, true); }
 }
 
-function short(a) { return a ? a.slice(0, 6) + "…" + a.slice(-4) : "—"; }
-function fmtDate(ts) { return new Date(ts * 1000).toLocaleString(); }
+async function addMilestone(aid) {
+  if (!requireLogin()) return;
+  const desc = document.getElementById(`ms-desc-${aid}`).value.trim();
+  const amount = parseFloat(document.getElementById(`ms-amount-${aid}`).value);
+  const dl = document.getElementById(`ms-deadline-${aid}`).value;
+  if (!desc || !amount || !dl) return toast("Fill in description, amount and deadline", true);
+  const btn = document.getElementById(`ms-btn-${aid}`);
+  btn.disabled = true; btn.textContent = "Locking USDC…";
+  try {
+    const r = await api("/api/milestones", "POST", {
+      agreement_id: aid, description: desc, amount,
+      deadline: Math.floor(new Date(dl).getTime() / 1000),
+    });
+    toast("Milestone added — USDC locked in escrow");
+    logTx(`Add milestone (A${aid})`, r.tx_hash);
+    if (r.lock) logTx(`Lock USDC (A${aid}/M${r.milestone_id})`, r.lock.tx_hash);
+    loadAgreements();
+  } catch (e) {
+    toast(e.message, true);
+    btn.disabled = false; btn.textContent = "Add Milestone & Lock USDC";
+    loadAgreements();
+  }
+}
 
-function milestoneButtons(aid, m) {
-  const btns = [];
-  if (role === "client") {
-    if (m.status === "Created")
-      btns.push(`<button class="btn btn-sm" onclick="milestoneAction('lock','Lock USDC',${aid},${m.milestone_id})">Lock USDC</button>`);
-    if (m.status === "Funded") {
-      btns.push(`<button class="btn btn-sm" onclick="milestoneAction('release','Release payment',${aid},${m.milestone_id})">Release</button>`);
-      btns.push(`<button class="btn btn-sm btn-danger" onclick="milestoneAction('dispute','Open dispute',${aid},${m.milestone_id})">Dispute</button>`);
-    }
-  } else if (m.status === "Funded") {
-    btns.push(`<button class="btn btn-sm btn-danger" onclick="milestoneAction('dispute','Open dispute',${aid},${m.milestone_id})">Dispute</button>`);
+async function submitWork(aid, mid) {
+  if (!requireLogin()) return;
+  const desc = document.getElementById(`sw-desc-${aid}-${mid}`).value.trim();
+  const url = document.getElementById(`sw-url-${aid}-${mid}`).value.trim();
+  if (!desc) return toast("Describe the deliverable", true);
+  const btn = document.getElementById(`sw-btn-${aid}-${mid}`);
+  btn.disabled = true; btn.textContent = "Submitting…";
+  try {
+    const r = await api("/api/milestones/submit", "POST", {
+      agreement_id: aid, milestone_id: mid, description: desc, url: url || null,
+    });
+    toast("Work submitted — waiting on client review");
+    if (r.tx_hash) logTx(`Submit work (A${aid}/M${mid})`, r.tx_hash);
+    loadAgreements();
+  } catch (e) {
+    toast(e.message, true);
+    btn.disabled = false; btn.textContent = "Submit Work";
   }
+}
+
+function disputeCountdown(m) {
+  const end = (m.disputed_at + DISPUTE_WINDOW) * 1000;
+  const left = end - Date.now();
+  if (left <= 0) return "Refund window open";
+  const h = Math.floor(left / 3600000), mi = Math.floor((left % 3600000) / 60000);
+  return `Auto-refund available in ${h}h ${mi}m`;
+}
+
+function milestoneBlock(a, m) {
+  const aid = a.agreement_id;
+  const role = agreementRole(a);
+  const isClient = role === "client", isProvider = role === "provider";
+  const parts = [];
+
+  parts.push(`<div class="milestone-row">
+    <div class="desc">${esc(m.description)}
+      <div class="sub">${m.amount.toFixed(2)} USDC · due ${fmtDate(m.deadline)}</div>
+    </div>
+    <span class="status s-${m.status}">${m.status}</span>
+  </div>`);
+
+  if (m.submission) {
+    parts.push(`<div class="submission-box">
+      <div class="st">Deliverable</div>
+      ${esc(m.submission.description)}
+      ${m.submission.url ? `<br><a href="${esc(m.submission.url)}" target="_blank" rel="noopener">${esc(m.submission.url)}</a>` : ""}
+      <div class="sub" style="color:var(--faint);margin-top:4px">Submitted ${fmtDate(m.submission.submitted_at)} by ${esc(m.submission.provider_email)}</div>
+    </div>`);
+  }
+
+  const actions = [];
+  if (m.status === "Created" && isClient)
+    actions.push(`<button class="btn btn-sm" onclick="milestoneAction('lock','Lock USDC',${aid},${m.milestone_id})">Lock USDC in Escrow</button>`);
+
+  if (m.status === "Funded" && isProvider) {
+    parts.push(`<div class="inline-form">
+      <div class="form-title">Step 4 — Submit your work</div>
+      <label>Deliverable description</label>
+      <textarea id="sw-desc-${aid}-${m.milestone_id}" rows="2" placeholder="What you delivered"></textarea>
+      <label>Link (optional)</label>
+      <input id="sw-url-${aid}-${m.milestone_id}" placeholder="https://…">
+      <button class="btn btn-sm" style="margin-top:12px" id="sw-btn-${aid}-${m.milestone_id}" onclick="submitWork(${aid},${m.milestone_id})">Submit Work</button>
+    </div>`);
+  }
+  if (m.status === "Funded" && isClient)
+    actions.push(`<span class="sub">Waiting on provider to submit work</span>`);
+
+  if (m.status === "Submitted" && isClient) {
+    actions.push(`<button class="btn btn-sm btn-success" onclick="milestoneAction('release','Release payment',${aid},${m.milestone_id})">Release Payment</button>`);
+    actions.push(`<button class="btn btn-sm btn-danger" onclick="milestoneAction('dispute','Open dispute',${aid},${m.milestone_id})">Dispute</button>`);
+  }
+  if (m.status === "Submitted" && isProvider)
+    actions.push(`<span class="sub">Waiting on client review</span>`);
+
+  if ((m.status === "Funded" || m.status === "Submitted") && isProvider)
+    actions.push(`<button class="btn btn-sm btn-danger" onclick="milestoneAction('dispute','Open dispute',${aid},${m.milestone_id})">Dispute</button>`);
+
   if (m.status === "Disputed") {
-    btns.push(m.refundable
-      ? `<button class="btn btn-sm" onclick="milestoneAction('refund','Claim refund',${aid},${m.milestone_id})">Claim Refund</button>`
-      : `<span class="sub" style="font-size:11px;color:var(--muted)">Auto-refund 48h after dispute</span>`);
+    if (m.refundable && isClient)
+      actions.push(`<button class="btn btn-sm" onclick="milestoneAction('refund','Claim refund',${aid},${m.milestone_id})">Claim Refund</button>`);
+    else
+      actions.push(`<span class="countdown">${disputeCountdown(m)}</span>`);
   }
-  return btns.join("");
+  if (m.status === "Released") actions.push(`<span class="sub" style="color:var(--success)">Paid to provider ✓</span>`);
+  if (m.status === "Refunded") actions.push(`<span class="sub">Refunded to client</span>`);
+
+  if (actions.length) parts.push(`<div class="actions" style="margin-top:10px">${actions.join("")}</div>`);
+  return `<div class="milestone">${parts.join("")}</div>`;
+}
+
+function addMilestoneForm(a) {
+  if (agreementRole(a) !== "client") return "";
+  return `<div class="inline-form">
+    <div class="form-title">Step 2 — Add a milestone (USDC locks in escrow automatically)</div>
+    <label>Description</label>
+    <textarea id="ms-desc-${a.agreement_id}" rows="2" placeholder="Deliver homepage design"></textarea>
+    <label>Amount (USDC)</label>
+    <input id="ms-amount-${a.agreement_id}" type="number" min="0" step="0.01" placeholder="150.00">
+    <label>Deadline</label>
+    <input id="ms-deadline-${a.agreement_id}" type="datetime-local">
+    <button class="btn btn-sm" style="margin-top:12px" id="ms-btn-${a.agreement_id}" onclick="addMilestone(${a.agreement_id})">Add Milestone &amp; Lock USDC</button>
+  </div>`;
 }
 
 async function loadAgreements() {
   const box = document.getElementById("agreements");
   try {
     const { agreements } = await api("/api/agreements");
-    if (!agreements.length) { box.innerHTML = `<div class="empty">No agreements yet — create one to get started.</div>`; return; }
+    if (!agreements.length) { box.innerHTML = `<div class="empty">No agreements yet.</div>`; return; }
     const cards = await Promise.all(agreements.map(a => api(`/api/agreements/${a.agreement_id}`)));
     box.innerHTML = cards.map(a => `
       <div class="agreement">
         <div class="agreement-head">
-          <h3>#${a.agreement_id} · ${a.title}</h3>
-          <span class="amount">${a.total_amount.toFixed(2)} USDC</span>
+          <h3>#${a.agreement_id} · ${esc(a.title)}${roleBadge(a)}</h3>
+          <span class="amount">${a.total_amount.toFixed(2)} <span class="unit">USDC</span></span>
         </div>
         <div class="meta">
-          <span>Client <a href="${EXPLORER}/address/${a.client}" target="_blank" style="color:var(--accent)">${short(a.client)}</a></span>
-          <span>Provider <a href="${EXPLORER}/address/${a.provider}" target="_blank" style="color:var(--accent)">${short(a.provider)}</a></span>
+          <span>Client <a href="${EXPLORER}/address/${a.client}" target="_blank">${short(a.client)}</a></span>
+          <span>Provider <a href="${EXPLORER}/address/${a.provider}" target="_blank">${short(a.provider)}</a></span>
           <span>Created ${fmtDate(a.created_at)}</span>
         </div>
-        ${a.milestones.length ? a.milestones.map(m => `
-          <div class="milestone">
-            <div class="desc">${m.description}
-              <div class="sub">${m.amount.toFixed(2)} USDC · due ${fmtDate(m.deadline)}</div>
-            </div>
-            <span class="status s-${m.status}">${m.status}</span>
-            <div class="actions">${milestoneButtons(a.agreement_id, m)}</div>
-          </div>`).join("") : `<div class="empty" style="padding:10px 0">No milestones yet</div>`}
+        ${stepIndicator(a)}
+        ${a.milestones.map(m => milestoneBlock(a, m)).join("")}
+        ${!a.milestones.length && currentUser ? addMilestoneForm(a) : ""}
+        ${!a.milestones.length && !currentUser ? `<div class="empty" style="padding:8px 0">No milestones yet — sign in to participate.</div>` : ""}
       </div>`).join("");
   } catch (e) {
     box.innerHTML = `<div class="empty">${e.message}</div>`;
   }
 }
 
-loadAgreements();
+restoreSession().then(refreshAll);
 </script>
 </body>
 </html>

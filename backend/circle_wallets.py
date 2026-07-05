@@ -82,7 +82,7 @@ async def create_wallet_set(name: str) -> dict:
         )
 
 
-async def create_wallet(wallet_set_id: str, ref_id: str = "") -> dict:
+async def create_wallet(wallet_set_id: str, ref_id: str = "", account_type: str = "EOA") -> dict:
     async with httpx.AsyncClient(timeout=30) as client:
         ciphertext = await get_entity_secret_ciphertext(client)
         return await _post(
@@ -93,7 +93,7 @@ async def create_wallet(wallet_set_id: str, ref_id: str = "") -> dict:
                 "entitySecretCiphertext": ciphertext,
                 "walletSetId": wallet_set_id,
                 "blockchains": [config.CIRCLE_BLOCKCHAIN],
-                "accountType": "EOA",
+                "accountType": account_type,
                 "count": 1,
                 "metadata": [{"refId": ref_id}] if ref_id else None,
             },
@@ -133,3 +133,51 @@ async def contract_execution(wallet_id: str, contract_address: str, abi_signatur
 async def get_transaction(tx_id: str) -> dict:
     async with httpx.AsyncClient(timeout=30) as client:
         return await _get(client, f"/transactions/{tx_id}")
+
+
+# ---------- User Controlled Wallets ----------
+
+async def create_user(user_id: str) -> dict:
+    """Create a Circle end user. Idempotent: 'already exists' is not an error."""
+    async with httpx.AsyncClient(timeout=30) as client:
+        try:
+            return await _post(client, "/users", {"userId": user_id})
+        except CircleError as e:
+            if "already" in str(e).lower() or "155101" in str(e):
+                return {"userId": user_id, "existing": True}
+            raise
+
+
+async def get_user_token(user_id: str) -> dict:
+    """Get a session token for an end user. Returns userToken + encryptionKey."""
+    async with httpx.AsyncClient(timeout=30) as client:
+        return await _post(client, "/users/token", {"userId": user_id})
+
+
+async def initialize_user(user_token: str, account_type: str = "SCA") -> dict:
+    """Initialize the user and request wallet creation on ARC-TESTNET."""
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.post(
+            f"{config.CIRCLE_API_BASE}/user/initialize",
+            headers={**_headers(), "X-User-Token": user_token},
+            json={
+                "idempotencyKey": str(uuid.uuid4()),
+                "accountType": account_type,
+                "blockchains": [config.CIRCLE_BLOCKCHAIN],
+            },
+        )
+        if r.status_code >= 400:
+            raise CircleError(f"Circle API {r.status_code}: {r.text}")
+        return r.json().get("data", {})
+
+
+async def list_user_wallets(user_token: str) -> dict:
+    """List wallets belonging to the end user identified by the user token."""
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.get(
+            f"{config.CIRCLE_API_BASE}/wallets",
+            headers={**_headers(), "X-User-Token": user_token},
+        )
+        if r.status_code >= 400:
+            raise CircleError(f"Circle API {r.status_code}: {r.text}")
+        return r.json().get("data", {})
